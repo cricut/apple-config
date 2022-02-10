@@ -45,7 +45,7 @@ jobs:
     - name: Configure SwiftPM
       run: |
         git config --global url."https://${{ secrets.CRICUT_GPR_TOKEN }}@github.com/cricut".insteadOf "https://github.com/cricut"
-        for FILE in $(grep -Ril "https://github.com/cricut" . --exclude-dir=.build --exclude-dir=Carthage --exclude-dir=.ci_scripts); do
+        for FILE in $(grep -Ril "https://github.com/cricut" . --exclude-dir=.build --exclude-dir=.swiftlint --exclude-dir=.git --exclude-dir=Carthage --exclude-dir=.ci_scripts); do
             echo "Configure PAT for: ${FILE}"
             sed -i '' "s/https:\/\/github.com\/cricut/https:\/\/${{ secrets.CRICUT_GPR_TOKEN }}@github.com\/cricut/g" ${FILE}
         done
