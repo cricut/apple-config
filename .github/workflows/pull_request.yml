@@ -55,7 +55,7 @@ jobs:
     - name: Run Unit Tests
       run: |
         sudo xcode-select -switch /Applications/Xcode_13.2.1.app/Contents/Developer
-        while sleep 10; do echo "=====[ $SECONDS seconds still running ]====="; done & \
+        while sleep 540; do echo "=====[ $SECONDS seconds still running ]====="; done & \
         xcodebuild test ONLY_ACTIVE_ARCH="YES" \
         -quiet \
         -configuration Debug \
