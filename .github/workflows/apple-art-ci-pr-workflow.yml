@@ -31,6 +31,7 @@ jobs:
     - name: Run Swiftlint
       run: |
         swiftlint --version
+        cat .swiftlint.yml
         swiftlint lint --strict
     - name: Setup Git Credentials
       run: |
