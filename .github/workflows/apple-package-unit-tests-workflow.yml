@@ -1,15 +1,9 @@
-name: apple-art-nightly-ui-workflow
+name: apple-package-unit-tests-workflow
 
 on:
   workflow_call:
     inputs:
-      project:
-        required: true
-        type: string
-      scheme:
-        required: true
-        type: string
-      tests:
+      package:
         required: true
         type: string
     secrets:
@@ -18,7 +12,7 @@ on:
 
 jobs:
   build:
-    name: apple-art-nightly-ui-workflow
+    name: apple-package-unit-tests-workflow
     runs-on: macos-11.0
     steps:
     - name: Checkout Repo
@@ -34,6 +28,11 @@ jobs:
       uses: fwal/setup-swift@v1
       with:
         swift-version: "5.5"
+    - name: Run Swiftlint
+      run: |
+        swiftlint --version
+        cat .swiftlint.yml
+        swiftlint lint --strict
     - name: Setup Git Credentials
       run: |
         defaults write com.apple.dt.Xcode IDEPackageSupportUseBuiltinSCM YES
@@ -53,18 +52,13 @@ jobs:
         done
     - name: Resolve Swift Packages
       run: |
-        xcodebuild \
-        -project '${{ inputs.project }}' \
-        -scheme '${{ inputs.scheme }}' \
-        -resolvePackageDependencies || exit 1
-    - name: Run UI Tests
+        xcodebuild -scheme '${{ inputs.package }}' -resolvePackageDependencies || exit 1
+    - name: Run Unit Tests
       run: |
         sudo xcode-select -switch /Applications/Xcode_13.2.1.app/Contents/Developer
         while sleep 540; do echo "=====[ $SECONDS seconds still running ]====="; done & \
         xcodebuild test ONLY_ACTIVE_ARCH="YES" \
         -quiet \
         -configuration Debug \
-        -project '${{ inputs.project }}' \
-        -scheme '${{ inputs.scheme }}' \
-        -only-testing:'${{ inputs.tests }}' \
+        -scheme '${{ inputs.package }}' \
         -destination 'platform=iOS Simulator,OS=latest,name=iPhone 8' || exit 1
