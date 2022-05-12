@@ -66,5 +66,5 @@ jobs:
     - name: Upload unit test results
       uses: actions/upload-artifact@v2
       with:
-      name: TestResults
+        name: TestResults
         path: /Users/runner/Library/Developer/Xcode/DerivedData/*/Logs/Test/*.xcresult
