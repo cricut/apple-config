@@ -63,3 +63,8 @@ jobs:
         -configuration Debug \
         -scheme '${{ inputs.package }}' \
         -destination 'platform=iOS Simulator,OS=latest,name=iPhone 8' || exit 1
+    - name: Upload unit test results
+        uses: actions/upload-artifact@v2
+        with:
+          name: TestResults
+          path: /Users/runner/Library/Developer/Xcode/DerivedData/*/Logs/Test/*.xcresult
