@@ -13,7 +13,7 @@ on:
 jobs:
   build:
     name: apple-package-unit-tests-workflow
-    runs-on: macos-11.0
+    runs-on: macos-latest
     steps:
     - name: Checkout Repo
       uses: actions/checkout@v2
@@ -27,7 +27,7 @@ jobs:
     - name: Swift Version
       uses: fwal/setup-swift@v1
       with:
-        swift-version: "5.5"
+        swift-version: "5.6"
     - name: Run Swiftlint
       run: |
         swiftlint --version
@@ -55,7 +55,7 @@ jobs:
         xcodebuild -scheme '${{ inputs.package }}' -resolvePackageDependencies || exit 1
     - name: Run Unit Tests
       run: |
-        sudo xcode-select -switch /Applications/Xcode_13.2.1.app/Contents/Developer
+        sudo xcode-select -switch /Applications/Xcode_13.3.1.app/Contents/Developer
         while sleep 540; do echo "=====[ $SECONDS seconds still running ]====="; done & \
         xcodebuild test ONLY_ACTIVE_ARCH="YES" \
         -quiet \
