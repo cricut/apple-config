@@ -52,6 +52,7 @@ jobs:
         done
     - name: Resolve Swift Packages
       run: |
+        sudo xcode-select -switch /Applications/Xcode_13.3.1.app/Contents/Developer
         xcodebuild -scheme '${{ inputs.package }}' -resolvePackageDependencies || exit 1
     - name: Run Unit Tests
       run: |
