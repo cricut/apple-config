@@ -1,9 +1,9 @@
 name: validate-ticket
 on:
   workflow_call:
-  secrets:
-      CRICUT_GPR_TOKEN:
-        required: true
+    secrets:
+        CRICUT_GPR_TOKEN:
+          required: true
 
 defaults:
   run:
