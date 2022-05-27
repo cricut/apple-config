@@ -1,8 +1,6 @@
 name: apple-package-unit-tests-with-branches-workflow
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, edited]
   workflow_call:
     inputs:
       scheme:
