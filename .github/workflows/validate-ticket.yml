@@ -1,0 +1,26 @@
+name: validate-ticket
+on:
+  workflow_call:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  validate-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Cricut.Action.TFSTicketCheck
+        uses: actions/checkout@v2
+        with:
+          repository: cricut/Cricut.Action.TFSTicketCheck
+          path: .github/actions/Cricut.Action.TFSTicketCheck
+          token: ${{secrets.CRICUT_GPR_TOKEN}}
+          ref: v1.1
+
+      - name: Validate TFS Ticket exists in PR
+        uses: ./.github/actions/Cricut.Action.TFSTicketCheck/
+        with:
+          token: ${{secrets.CRICUT_GPR_TOKEN}}
+          repo: ${{github.event.repository.name}}
