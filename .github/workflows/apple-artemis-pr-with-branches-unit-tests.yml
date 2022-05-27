@@ -1,0 +1,120 @@
+name: apple-package-unit-tests-with-branches-workflow
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+  workflow_call:
+    inputs:
+      scheme:
+        required: true
+        type: string
+      parent_app:
+        required: false
+        type: string
+        default: ''
+      parent_app_scheme:
+        required: false
+        type: string
+        default: ''
+    secrets:
+      CRICUT_GPR_TOKEN:
+        required: true
+
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: apple-package-unit-tests-workflow
+    runs-on: [macOS, sojo, macos-12.3.1]
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 1
+    - name: List Branches for this PR
+      run: |
+        echo github.base_ref: ${{ github.base_ref }}
+        echo github.head_ref: ${{ github.head_ref }}
+        echo github.ref: ${{ github.ref }}
+    - name: Setup Git Credentials
+      run: |
+        defaults write com.apple.dt.Xcode IDEPackageSupportUseBuiltinSCM YES
+        git config --global credential.helper osxkeychain
+        git credential-osxkeychain store <<EOF
+        protocol=https
+        host=github.com
+        username=cricut-builduser
+        password=${{ secrets.CRICUT_GPR_TOKEN }}
+        EOF
+    - name: Configure SwiftPM
+      run: |
+        git config --global url."https://${{ secrets.CRICUT_GPR_TOKEN }}@github.com/cricut".insteadOf "https://github.com/cricut"
+        for FILE in $(grep -Ril "https://github.com/cricut" . --exclude-dir=.build --exclude-dir=.swiftlint --exclude-dir=.git --exclude-dir=Carthage --exclude-dir=.ci_scripts); do
+            echo "Configure PAT for: ${FILE}"
+            sed -i '' "s/https:\/\/github.com\/cricut/https:\/\/${{ secrets.CRICUT_GPR_TOKEN }}@github.com\/cricut/g" ${FILE}
+        done
+    - name: Checkout Local Dependencies
+      run: |
+        pr_description="${{ github.event.pull_request.body }}"
+        pr_description=$(echo $pr_description | perl -pe "s/___/~/g")
+        pr_description=$(echo $pr_description | cut -d "~" -f2 | cut -d "~" -f1)
+        repos=$(echo $pr_description | cut -d ";" -f 1)
+        IFS=': ' read -ra repos <<< "$pr_description"
+
+        cd ~/
+        rm -rf LocalCheckouts
+        rm -rf ~/Library/Developer/Xcode/DerivedData
+        mkdir LocalCheckouts
+        cd LocalCheckouts
+        for ((i = 1 ; i < ${#repos[@]} ; i+=2)); do
+            repo=${repos[$i]}
+            branch=${repos[$i + 1]}
+            echo $repo
+            echo "${branch//[$'\t\r\n ']}"
+            git clone -b "${branch//[$'\t\r\n ']}" "https://github.com/cricut/${repo//[$'\t\r\n ']}.git" --depth 1
+        done
+    - name: Swift Version
+      uses: fwal/setup-swift@v1
+      with:
+        swift-version: "5.6"
+    - name: Run Swiftlint
+      run: |
+        swiftlint --version
+        cat .swiftlint.yml
+        swiftlint lint --strict
+    - name: Resolve Swift Packages
+      run: |
+        # xcode-select -switch /Applications/Xcode_13.4.app/Contents/Developer
+        xcodebuild -scheme '${{ inputs.scheme }}' -resolvePackageDependencies || exit 1
+    - name: Run Unit Tests
+      run: |
+        # xcode-select -switch /Applications/Xcode_13.4.app/Contents/Developer
+        while sleep 540; do echo "=====[ $SECONDS seconds still running ]====="; done & \
+        xcodebuild test ONLY_ACTIVE_ARCH="YES" \
+        -quiet \
+        -configuration Debug \
+        -scheme '${{ inputs.scheme }}' \
+        -destination 'platform=iOS Simulator,OS=latest,name=iPhone 8' || exit 1
+    - name: Run Build for Parent app
+      if: inputs.parent_app != ''
+      run: |
+        cd '~/LocalCheckouts/${{ inputs.parent_app }}'
+        # xcode-select -switch /Applications/Xcode_13.4.app/Contents/Developer
+        xcodebuild -scheme '${{ inputs.parent_app_scheme }}' -resolvePackageDependencies || exit 1
+        while sleep 540; do echo "=====[ $SECONDS seconds still running ]====="; done & \
+        xcodebuild ONLY_ACTIVE_ARCH="YES" \
+        -quiet \
+        -configuration Debug \
+        -scheme '${{ inputs.parent_app_scheme }}' \
+        -destination 'platform=iOS Simulator,OS=latest,name=iPhone 8' || exit 1
+    - name: Upload unit test results
+      uses: actions/upload-artifact@v2
+      with:
+        name: TestResults
+        path: /Users/runner/Library/Developer/Xcode/DerivedData/*/Logs/Test/*.xcresult
+    - name: Cleanup Local Dependencies
+      run: |
+        rm -rf ~/LocalCheckouts
+        rm -rf ~/Library/Developer/Xcode/DerivedData
