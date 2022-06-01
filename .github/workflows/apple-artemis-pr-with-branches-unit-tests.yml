@@ -102,6 +102,9 @@ jobs:
         echo "List Local Checkouts"
         ls ~/LocalCheckouts/
         cd ~/LocalCheckouts/${{ inputs.parent_app }}
+        derived=$(xcodebuild -showBuildSettings | grep -m 1 BUILD_DIR | grep -oE "\/.*" | sed 's|/Build/Products||')
+        # The above will return a folder with a name like /Users/you/Library/Developer/Xcode/DerivedData/MyProject-ehdkocavaenextdcrsaszjdmyssx
+        rm -rf "$derived"
         # xcode-select -switch /Applications/Xcode_13.4.app/Contents/Developer
         xcodebuild -scheme '${{ inputs.parent_app_scheme }}' -resolvePackageDependencies || exit 1
         while sleep 540; do echo "=====[ $SECONDS seconds still running ]====="; done & \
