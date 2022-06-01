@@ -98,8 +98,7 @@ jobs:
     - name: Run Build for Parent app
       if: inputs.parent_app != ''
       run: |
-        cd '~/LocalCheckouts/${{ inputs.parent_app }}'
-        # xcode-select -switch /Applications/Xcode_13.4.app/Contents/Developer
+        cd ~/LocalCheckouts/${{ inputs.parent_app }}
         xcodebuild -scheme '${{ inputs.parent_app_scheme }}' -resolvePackageDependencies || exit 1
         while sleep 540; do echo "=====[ $SECONDS seconds still running ]====="; done & \
         xcodebuild ONLY_ACTIVE_ARCH="YES" \
