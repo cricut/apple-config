@@ -101,7 +101,7 @@ jobs:
         ls
         echo "List Local Checkouts"
         ls ~/LocalCheckouts/
-        cd "~/LocalCheckouts/${{inputs.parent_app}}/"
+        cd ~/LocalCheckouts/${{ inputs.parent_app }}
         # xcode-select -switch /Applications/Xcode_13.4.app/Contents/Developer
         xcodebuild -scheme '${{ inputs.parent_app_scheme }}' -resolvePackageDependencies || exit 1
         while sleep 540; do echo "=====[ $SECONDS seconds still running ]====="; done & \
