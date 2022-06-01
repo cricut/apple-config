@@ -99,7 +99,6 @@ jobs:
       if: inputs.parent_app != ''
       run: |
         cd ~/LocalCheckouts/${{ inputs.parent_app }}
-        derived=$(xcodebuild -showBuildSettings | grep -m 1 BUILD_DIR | grep -oE "\/.*" | sed 's|/Build/Products||')
         xcodebuild -scheme '${{ inputs.parent_app_scheme }}' -resolvePackageDependencies || exit 1
         while sleep 540; do echo "=====[ $SECONDS seconds still running ]====="; done & \
         xcodebuild ONLY_ACTIVE_ARCH="YES" \
