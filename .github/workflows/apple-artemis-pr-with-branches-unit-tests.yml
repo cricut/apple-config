@@ -55,8 +55,7 @@ jobs:
         done
     - name: Checkout Local Dependencies
       run: |
-        pr_description="${{ github.event.pull_request.body }}"
-        pr_description=${$pr_description//[^a-zA-Z0-9_-:]/}
+        pr_description=`sed -e 's/^"//' -e 's/"$//' <<<"${{ github.event.pull_request.body }}"`
         pr_description=$(echo $pr_description | perl -pe "s/___/~/g")
         pr_description=$(echo $pr_description | cut -d "~" -f2 | cut -d "~" -f1)
         repos=$(echo $pr_description | cut -d ";" -f 1)
