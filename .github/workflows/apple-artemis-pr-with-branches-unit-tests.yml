@@ -62,7 +62,7 @@ jobs:
         pr_description=$(echo $pr_description | cut -d "~" -f2 | cut -d "~" -f1)
         echo $pr_description
         repos=$(echo $pr_description | cut -d ";" -f 1)
-        IFS=':' read -ra repos <<< "$pr_description"
+        IFS=': ' read -ra repos <<< "$pr_description"
 
         cd ~/
         rm -rf LocalCheckouts
