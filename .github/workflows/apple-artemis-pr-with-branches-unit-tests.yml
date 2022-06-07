@@ -55,12 +55,9 @@ jobs:
         done
     - name: Checkout Local Dependencies
       run: |
-        pr_description=$(perl -pe 's/[^\w.-_:]+//s' <<< "${{ github.event.pull_request.body }}")
-        echo $pr_description
+        pr_description=$(perl -0777pi -pe 's/[^\w.-_:]+//s' <<< "${{ github.event.pull_request.body }}")
         pr_description=$(echo $pr_description | perl -pe "s/___/~/g")
-        echo $pr_description
         pr_description=$(echo $pr_description | cut -d "~" -f2 | cut -d "~" -f1)
-        echo $pr_description
         repos=$(echo $pr_description | cut -d ";" -f 1)
         IFS=': ' read -ra repos <<< "$pr_description"
 
