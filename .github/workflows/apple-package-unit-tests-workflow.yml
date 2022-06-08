@@ -13,7 +13,7 @@ on:
 jobs:
   build:
     name: apple-package-unit-tests-workflow
-    runs-on: macos-12
+    runs-on: [macOS, sojo, macos-12.3.1]
     steps:
     - name: Checkout Repo
       uses: actions/checkout@v2
