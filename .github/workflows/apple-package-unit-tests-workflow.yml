@@ -10,10 +10,14 @@ on:
       CRICUT_GPR_TOKEN:
         required: true
 
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: apple-package-unit-tests-workflow
-    runs-on: macos-12
+    runs-on: [macOS, sojo, macos-12.3.1]
     steps:
     - name: Checkout Repo
       uses: actions/checkout@v2
@@ -52,11 +56,11 @@ jobs:
         done
     - name: Resolve Swift Packages
       run: |
-        sudo xcode-select -switch /Applications/Xcode_13.3.1.app/Contents/Developer
+        #sudo xcode-select -switch /Applications/Xcode_13.3.1.app/Contents/Developer
         xcodebuild -scheme '${{ inputs.package }}' -resolvePackageDependencies || exit 1
     - name: Run Unit Tests
       run: |
-        sudo xcode-select -switch /Applications/Xcode_13.3.1.app/Contents/Developer
+        #sudo xcode-select -switch /Applications/Xcode_13.3.1.app/Contents/Developer
         while sleep 540; do echo "=====[ $SECONDS seconds still running ]====="; done & \
         xcodebuild test ONLY_ACTIVE_ARCH="YES" \
         -quiet \
