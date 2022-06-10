@@ -27,10 +27,6 @@ jobs:
     name: apple-package-unit-tests-workflow
     runs-on: [macOS, sojo, macos-12.3.1]
     steps:
-    - name: Checkout Repo
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 1
     - name: List Branches for this PR
       run: |
         echo github.base_ref: ${{ github.base_ref }}
@@ -66,6 +62,9 @@ jobs:
         rm -rf ~/Library/Developer/Xcode/DerivedData
         mkdir LocalCheckouts
         cd LocalCheckouts
+
+        git clone -b "${{ github.head_ref }}" "https://github.com/cricut/${{ github.event.repository.name }}.git" --depth 1
+
         for ((i = 1 ; i < ${#repos[@]} ; i+=2)); do
             repo=${repos[$i]}
             branch=${repos[$i + 1]}
@@ -85,10 +84,12 @@ jobs:
     - name: Resolve Swift Packages
       run: |
         # xcode-select -switch /Applications/Xcode_13.4.app/Contents/Developer
+        cd ~/LocalCheckouts/${{ github.event.repository.name }}
         xcodebuild -scheme '${{ inputs.scheme }}' -resolvePackageDependencies || exit 1
     - name: Run Unit Tests
       run: |
         # xcode-select -switch /Applications/Xcode_13.4.app/Contents/Developer
+        cd ~/LocalCheckouts/${{ github.event.repository.name }}
         while sleep 540; do echo "=====[ $SECONDS seconds still running ]====="; done & \
         xcodebuild test ONLY_ACTIVE_ARCH="YES" \
         -quiet \
