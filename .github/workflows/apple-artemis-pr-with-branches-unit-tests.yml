@@ -79,6 +79,7 @@ jobs:
     - name: Run Swiftlint
       run: |
         swiftlint --version
+        cd ~/LocalCheckouts/${{ github.event.repository.name }}
         cat .swiftlint.yml
         swiftlint lint --strict
     - name: Resolve Swift Packages
