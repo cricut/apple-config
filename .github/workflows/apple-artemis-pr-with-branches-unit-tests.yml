@@ -76,11 +76,6 @@ jobs:
       uses: fwal/setup-swift@v1
       with:
         swift-version: "5.6"
-    - name: Run Swiftlint
-      run: |
-        swiftlint --version
-        cat .swiftlint.yml
-        swiftlint lint --strict
     - name: Resolve Swift Packages
       run: |
         # xcode-select -switch /Applications/Xcode_13.4.app/Contents/Developer
