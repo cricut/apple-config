@@ -68,7 +68,7 @@ jobs:
 
         git clone -b "${{ github.head_ref }}" "https://github.com/cricut/${{ github.event.repository.name }}.git" --depth 1
 
-        for ((i = 1 ; i < ${#repos[@]} ; i+=2)); do
+        for ((i = 0 ; i < ${#repos[@]} ; i+=2)); do
             repo=${repos[$i]}
             branch=${repos[$i + 1]}
             echo $repo
