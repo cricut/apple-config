@@ -51,7 +51,7 @@ jobs:
         done
     - name: Checkout Local Dependencies
       run: |
-        pr_description=$(perl -0777p -pe 's/[^\w._:\s]+//gm' <<< cat << EndOfMessage 
+        pr_description=$(perl -0777p -pe 's/[^\w.-_:\s]+//gm' <<< cat << EndOfMessage 
         ${{ github.event.pull_request.body }}
         EndOfMessage
         )
